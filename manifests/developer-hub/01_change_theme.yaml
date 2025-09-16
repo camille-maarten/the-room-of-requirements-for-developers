@@ -8,6 +8,7 @@ metadata:
 data:
   app-config.yaml: |
     app:
+      title: Hogwards
       baseUrl: https://backstage-developer-hub-backstage.apps.cluster-8f4q9.8f4q9.sandbox1055.opentlc.com
       branding:
         fullLogoWidth: 180
@@ -118,6 +119,18 @@ data:
       environment: production
       providers:
         oauth2Proxy: {}
+      awsS3: # minio
+        default: # identifies your dataset / provider independent of config changes
+          bucketName: minio-tech-docs
+          #prefix: prefix/ # optional
+          region: eu-west-3 # optional, uses the default region otherwise
+          schedule: # same options as in TaskScheduleDefinition
+            # supports cron, ISO duration, "human duration" as used in code
+            #frequency: { minutes: 30 }
+            frequency: { minutes: 1 }
+            # supports ISO duration, "human duration" as used in code
+            timeout: { minutes: 3 }
+            initialDelay: { seconds: 15 }
     backend:
       auth:
         externalAccess:
@@ -164,6 +177,8 @@ data:
       reading:
         allow:
           - host: '*.apps.cluster-8f4q9.8f4q9.sandbox1055.opentlc.com'
+          - host: raw.githubusercontent.com
+          - host: github.com
     catalog:
       locations:
         - rules:
@@ -297,11 +312,11 @@ data:
         runIn: local
       publisher:
         awsS3:
-          bucketName: backstage-bucket
+          bucketName: techdocs
           credentials:
-            accessKeyId: minio
-            secretAccessKey: MjQyNjMz
-          endpoint: https://minio-ic-shared-minio.apps.cluster-8f4q9.8f4q9.sandbox1055.opentlc.com
+            accessKeyId: minioadmin
+            secretAccessKey: minioadmin
+          endpoint: https://minio-api-backstage.apps.cluster-8f4q9.8f4q9.sandbox1055.opentlc.com
           region: us-east-2
           s3ForcePathStyle: true
         type: awsS3
