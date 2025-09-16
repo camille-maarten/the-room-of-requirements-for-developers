@@ -1,4 +1,4 @@
-site_name: tech-docs-change-data-capture
+site_name: 'Tech docs: Change data capture'
 site_description: Technical documentation to enable (and demo) change data capture pattern on OpenShift
 
 plugins:
