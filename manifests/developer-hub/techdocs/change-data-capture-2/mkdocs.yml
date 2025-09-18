@@ -1,0 +1,14 @@
+site_name: 'Tech docs: Change data capture'
+site_description: Technical documentation to enable (and demo) change data capture pattern on OpenShift
+
+docs_dir: docs
+use_directory_urls: false
+
+plugins:
+  - techdocs-core
+
+nav:
+  - Install operators: install_and_configure_the_operators.md
+  - Configure platform: wrap_up_operator_config.md
+  - Decompose the monolith with CDC: decompose_the_monolith.md
+  - CDC integration example: cdc-based-example.md
