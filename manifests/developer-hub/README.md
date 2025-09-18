@@ -14,3 +14,9 @@ Same content as the one above, but this one can be used to apply the Hogwards th
 ## Theme
 Applying the theme should result in the following layout:
 ![The Hogwards theme applied on Developer Hub](images/hogwards_theme.png "Hogwards Theme for Developer Hub")
+
+  
+  
+**Pay attention:** when you take our file, do a manual merge of the app and techdocs configuration
+or do a full copy-paste, but then validate the secrets, tokens and URLs in the configuration, 
+as they will not match with your cluster.

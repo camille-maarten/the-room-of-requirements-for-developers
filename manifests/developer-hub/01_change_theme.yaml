@@ -312,7 +312,7 @@ data:
         runIn: local
       publisher:
         awsS3:
-          bucketName: techdocs
+          bucketName: backstage-bucket
           credentials:
             accessKeyId: minioadmin
             secretAccessKey: minioadmin
@@ -375,3 +375,11 @@ data:
               menuItem:
                 icon: techRadar
                 text: Marauder’s Map
+        red-hat-developer-hub.backstage-plugin-orchestrator:
+          dynamicRoutes:
+            - importName: OrchestratorPage
+              menuItem:
+                icon: orchestratorIcon
+                text: Headmaster’s Office
+              module: OrchestratorPlugin
+              path: /orchestrator
