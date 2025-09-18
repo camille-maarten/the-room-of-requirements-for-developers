@@ -13,7 +13,8 @@ npx @techdocs/cli generate --verbose
 ```
 
   
-* A sites folder will be created. This folder's content needs to be published to an S3 storage like Minio.  
+* A sites folder will be created. This folder's content needs to be published to an S3 storage like Minio.    
+_Within the bucket, create a directory structure default/component/tech-docs-change-data-capture and add the content of the site's folder over there_
 * Last, but not least, you'll need to add (via the spells menu item) the raw link to the catalog-info.yaml (or enable GitHub repo scanning).
 
 
