@@ -30,3 +30,4 @@ replay_pid*
 
 # build folders
 /manifests/developer-hub/techdocs/change-data-capture/site/
+/manifests/developer-hub/techdocs/demo-outline/site/

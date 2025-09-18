@@ -2,7 +2,7 @@ site_name: 'Tech docs: Change data capture'
 site_description: Technical documentation to enable (and demo) change data capture pattern on OpenShift
 
 docs_dir: docs
-use_directory_urls: false
+use_directory_urls: true
 
 plugins:
   - techdocs-core

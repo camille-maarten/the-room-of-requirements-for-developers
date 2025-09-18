@@ -20,3 +20,17 @@ Applying the theme should result in the following layout:
 **Pay attention:** when you take our file, do a manual merge of the app and techdocs configuration
 or do a full copy-paste, but then validate the secrets, tokens and URLs in the configuration, 
 as they will not match with your cluster.
+
+
+## Debug database
+* connect to pod
+* psql -U postgres
+* \l to list databases
+* \c backstage_plugin_catalog to connect to a database
+* list tables:
+```sql
+SELECT table_schema, table_name
+FROM information_schema.tables
+WHERE table_type = 'BASE TABLE'
+  AND table_schema NOT IN ('pg_catalog', 'information_schema');
+```
