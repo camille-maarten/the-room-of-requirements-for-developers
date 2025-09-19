@@ -1,0 +1,414 @@
+#helm repo add backstage https://janus-idp.github.io/helm-backstage
+#helm repo update
+#oc project backstage
+#helm install backstage backstage/backstage --values values.yaml
+
+global:
+  auth:
+    backend:
+      enabled: true
+  clusterRouterBase: apps.cluster-kzvll.kzvll.sandbox355.opentlc.com
+  dynamic:
+    includes:
+      - dynamic-plugins.default.yaml
+    plugins:
+      - package: ./dynamic-plugins/dist/roadiehq-backstage-plugin-security-insights
+        disabled: false
+      - package: ./dynamic-plugins/dist/immobiliarelabs-backstage-plugin-gitlab-backend-dynamic
+        disabled: false
+      - package: ./dynamic-plugins/dist/immobiliarelabs-backstage-plugin-gitlab
+        disabled: false
+      - package: ./dynamic-plugins/dist/backstage-plugin-catalog-backend-module-gitlab-dynamic
+        disabled: false
+      - package: ./dynamic-plugins/dist/backstage-plugin-scaffolder-backend-module-gitlab-dynamic
+        disabled: false
+      - package: ./dynamic-plugins/dist/backstage-plugin-kubernetes-backend-dynamic
+        disabled: false
+      - package: ./dynamic-plugins/dist/backstage-plugin-kubernetes
+        disabled: false
+      - package: ./dynamic-plugins/dist/backstage-community-plugin-topology
+        disabled: false
+      - package: ./dynamic-plugins/dist/roadiehq-backstage-plugin-argo-cd-backend-dynamic
+        disabled: false
+      - package: ./dynamic-plugins/dist/roadiehq-scaffolder-backend-argocd-dynamic
+        disabled: false
+      - package: ./dynamic-plugins/dist/roadiehq-backstage-plugin-argo-cd
+        disabled: true
+      - package: ./dynamic-plugins/dist/backstage-community-plugin-ocm
+        disabled: false
+      - package: ./dynamic-plugins/dist/backstage-community-plugin-ocm-backend-dynamic
+        disabled: false
+      - package: ./dynamic-plugins/dist/roadiehq-scaffolder-backend-module-utils-dynamic
+        disabled: false
+      - package: ./dynamic-plugins/dist/backstage-community-plugin-catalog-backend-module-keycloak-dynamic
+        disabled: false
+      - package: ./dynamic-plugins/dist/backstage-plugin-techdocs-backend-dynamic
+        disabled: false
+      - package: ./dynamic-plugins/dist/backstage-community-plugin-jenkins-backend-dynamic
+        disabled: false
+      - package: ./dynamic-plugins/dist/backstage-community-plugin-jenkins
+        disabled: false
+      - package: ./dynamic-plugins/dist/backstage-plugin-techdocs
+        disabled: false
+      - package: ./dynamic-plugins/dist/backstage-community-plugin-tekton
+        pluginConfig:
+          dynamicPlugins:
+            frontend:
+              backstage-community.plugin-tekton:
+                mountPoints:
+                  - mountPoint: entity.page.ci/cards
+                    importName: TektonCI
+                    config:
+                      layout:
+                        gridColumn: "1 / -1"
+                        gridRowStart: 1
+                      if:
+                        allOf:
+                          - isTektonCIAvailable
+        disabled: false
+      - package: ./dynamic-plugins/dist/backstage-community-plugin-quay
+        disabled: false
+      - package: ./dynamic-plugins/dist/backstage-community-plugin-tech-radar
+        disabled: false
+      - package:  ./dynamic-plugins/dist/backstage-community-plugin-redhat-argocd
+        disabled: false
+      - disabled: false
+        package: "@redhat/backstage-plugin-orchestrator-backend-dynamic@1.4.0"
+        integrity: sha512-2aOHDLFrGMAtyHFiyGZwVBZ9Op+TmKYUwfZxwoaGJ1s6JSy/0qgqineEEE0K3dn/f17XBUj+H1dwa5Al598Ugw==
+        pluginConfig:
+          orchestrator:
+            dataIndexService:
+              url: http://sonataflow-platform-data-index-service.sonataflow-infra
+      - disabled: false
+        package: "@redhat/backstage-plugin-orchestrator@1.4.0"
+        integrity: sha512-2yasbfBZ3iKntArIfK+hk9tvv4b/dy9+WKXOcWIotqkI1gv+Nhvy+m55KAUWi2vmfM0rj3EoG6YP+3Zajn1KyA==
+        pluginConfig:
+          dynamicPlugins:
+            frontend:
+              red-hat-developer-hub.backstage-plugin-orchestrator:
+                appIcons:
+                  - importName: OrchestratorIcon
+                    module: OrchestratorPlugin
+                    name: orchestratorIcon
+                dynamicRoutes:
+                  - importName: OrchestratorPage
+                    menuItem:
+                      icon: orchestratorIcon
+                      text: Orchestrator
+                    module: OrchestratorPlugin
+                    path: /orchestrator
+      - disabled: false
+        package: "./dynamic-plugins/dist/backstage-plugin-notifications"
+      - disabled: false
+        package: "./dynamic-plugins/dist/backstage-plugin-signals"
+      - disabled: false
+        package: "./dynamic-plugins/dist/backstage-plugin-notifications-backend-dynamic"
+      - disabled: false
+        package: "./dynamic-plugins/dist/backstage-plugin-signals-backend-dynamic"
+
+upstream:
+  backstage:
+    image:
+      registry: quay.io
+      repository: rhdh/rhdh-hub-rhel9
+      tag: '1.4-160'
+      pullSecrets:
+        - redhat-gpte-devhub-pull-secret
+    extraEnvVars:
+      - name: NODE_OPTIONS
+        value: --no-node-snapshot
+      - name: BACKEND_SECRET
+        value: "{{ randAlphaNum 24 | b64enc }}"
+      - name: ORCHESTRATOR_TOKEN
+        valueFrom:
+          secretKeyRef:
+            key: orchestrator-token
+            name: backstage-orchestrator-token
+      - name: 'APP_CONFIG_app_baseUrl'
+        value: 'https://backstage-backstage.apps.cluster-kzvll.kzvll.sandbox355.opentlc.com'
+      - name: 'APP_CONFIG_backend_baseUrl'
+        value: 'https://backstage-backstage.apps.cluster-kzvll.kzvll.sandbox355.opentlc.com'
+      - name: 'APP_CONFIG_backend_cors_origin'
+        value: 'https://backstage-backstage.apps.cluster-kzvll.kzvll.sandbox355.opentlc.com'
+      - name: POSTGRES_ADMIN_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            key: postgres-password
+            name: backstage-postgresql
+      - name: NODE_TLS_REJECT_UNAUTHORIZED
+        value: "0"
+      - name: APP_CONFIG_catalog_providers_keycloakOrg_default_baseUrl
+        value: https://keycloak-rhsso.apps.cluster-kzvll.kzvll.sandbox355.opentlc.com/auth
+      - name: APP_CONFIG_catalog_providers_keycloakOrg_default_loginRealm
+        value: backstage
+      - name: APP_CONFIG_catalog_providers_keycloakOrg_default_realm
+        value: backstage
+      - name: APP_CONFIG_catalog_providers_keycloakOrg_default_clientId
+        valueFrom:
+          secretKeyRef:
+            key: CLIENT_ID
+            name: keycloak-client-secret-backstage
+      - name: APP_CONFIG_catalog_providers_keycloakOrg_default_clientSecret
+        valueFrom:
+          secretKeyRef:
+            key: CLIENT_SECRET
+            name: keycloak-client-secret-backstage
+      - name: LOG_LEVEL
+        value: debug
+    extraContainers:
+      - name: oauth2-proxy
+        env:
+          - name: OAUTH2_PROXY_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                key: CLIENT_ID
+                name: keycloak-client-secret-backstage
+          - name: OAUTH2_PROXY_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: CLIENT_SECRET
+                name: keycloak-client-secret-backstage
+          - name: OAUTH2_PROXY_COOKIE_SECRET
+            value: "{{ randAlpha 32 | lower | b64enc }}"
+          - name: OAUTH2_PROXY_OIDC_ISSUER_URL
+            value: https://keycloak-rhsso.apps.cluster-kzvll.kzvll.sandbox355.opentlc.com/auth/realms/backstage
+          - name: OAUTH2_PROXY_SSL_INSECURE_SKIP_VERIFY
+            value: 'true'
+        ports:
+          - name: oauth2-proxy
+            containerPort: 4180
+            protocol: TCP
+        imagePullPolicy: IfNotPresent
+        image: 'quay.io/oauth2-proxy/oauth2-proxy:latest'
+        args:
+          - '--provider=oidc'
+          - '--email-domain=*'
+          - '--upstream=http://localhost:7007'
+          - '--http-address=0.0.0.0:4180'
+          - '--skip-provider-button'
+          - '--insecure-oidc-allow-unverified-email=true'
+
+    appConfig:
+      backend:
+        auth:
+          externalAccess:
+            - type: static
+              options:
+                token: ${ORCHESTRATOR_TOKEN}
+                subject: orchestrator
+        listen:
+          port: 7007
+          host: 0.0.0.0
+        csp:
+          script-src: ["'self'", "'unsafe-inline'", "'unsafe-eval'"]
+          script-src-elem: ["'self'", "'unsafe-inline'", "'unsafe-eval'"]
+          img-src: ["'self'", 'data:']
+          connect-src: ["'self'", 'http:', 'https:', 'data:']
+        cors:
+          origin: https://backstage-backstage.apps.cluster-kzvll.kzvll.sandbox355.opentlc.com
+          methods: [GET, POST, PUT, DELETE]
+          credentials: true
+        database:
+          client: pg
+          connection:
+            host: "${POSTGRES_HOST}"
+            port: "${POSTGRES_PORT}"
+            user: "${POSTGRES_USER}"
+            password: "${POSTGRES_ADMIN_PASSWORD}"
+        reading:
+          allow:
+            - host: '*.apps.cluster-kzvll.kzvll.sandbox355.opentlc.com'
+
+      integrations:
+        gitlab:
+          - host: gitlab-gitlab.apps.cluster-kzvll.kzvll.sandbox355.opentlc.com
+            baseUrl: https://gitlab-gitlab.apps.cluster-kzvll.kzvll.sandbox355.opentlc.com
+            apiBaseUrl: https://gitlab-gitlab.apps.cluster-kzvll.kzvll.sandbox355.opentlc.com/api/v4
+            token: glpat-yQ31bxmnyM3YjmE5ZxWs
+
+      proxy:
+        endpoints:
+          '/quay/api':
+            target: 'https://quay-kzvll.apps.cluster-kzvll.kzvll.sandbox355.opentlc.com'
+            headers:
+              X-Requested-With: 'XMLHttpRequest'
+              # Uncomment the following line to access a private Quay Repository using a token
+              Authorization: 'Bearer A2X8QY5FA8XFBF1B3D7B1BX1CUYMO8HI6QZFS16T'
+            changeOrigin: true
+            # Change to "false" in case of using self hosted quay instance with a self-signed certificate
+            secure: false
+          '/developer-hub':
+            target: https://gitlab-gitlab.apps.cluster-kzvll.kzvll.sandbox355.opentlc.com/
+            pathRewrite:
+              '^/api/proxy/developer-hub/tech-radar': /gitops/janus-idp-gitops/-/raw/main/config/tech-radar.json
+            changeOrigin: true
+            secure: false
+
+      quay:
+        # The UI url for Quay, used to generate the link to Quay
+        uiUrl: 'https://quay-kzvll.apps.cluster-kzvll.kzvll.sandbox355.opentlc.com'
+
+      jenkins:
+        instances:
+          - name: default
+            baseUrl: https://jenkins-jenkins.apps.cluster-kzvll.kzvll.sandbox355.opentlc.com
+            username: admin
+            apiKey: 11aafbd840b32ec51ca9704f53aca0444d
+
+      techdocs:
+        builder: 'external'
+        generator:
+          runIn: 'local'
+        publisher:
+          type: 'awsS3'
+          awsS3:
+            bucketName: backstage-bucket
+            region: us-east-2
+            endpoint: https://minio-ic-shared-minio.apps.cluster-kzvll.kzvll.sandbox355.opentlc.com
+            s3ForcePathStyle: true
+            credentials:
+              accessKeyId: minio
+              secretAccessKey: OTIyMDU1
+
+      auth:
+        environment: production
+        providers:
+          oauth2Proxy: {}
+
+      signInPage: oauth2Proxy
+
+      scaffolder:
+      # see https://backstage.io/docs/features/software-templates/configuration for software template options
+
+      catalog:
+        rules:
+          - allow: [Domain, Component, System, API, Resource, Location, Template]
+        locations:
+          - target: https://gitlab-gitlab.apps.cluster-kzvll.kzvll.sandbox355.opentlc.com/rhdh/trusted-application-pipeline-templates/blob/main/showcase-templates.yaml
+            type: url
+            rules:
+              - allow: [Template]
+          - target: https://gitlab-gitlab.apps.cluster-kzvll.kzvll.sandbox355.opentlc.com/rhdh/rhoai-on-rhdh-templates/blob/main/showcase-templates.yaml
+            type: url
+            rules:
+              - allow: [Template]
+          - target: https://gitlab-gitlab.apps.cluster-kzvll.kzvll.sandbox355.opentlc.com/rhdh/trusted-application-pipeline-templates/blob/main/org.yaml
+            type: url
+            rules:
+              - allow: [Group, User]
+          - target: https://gitlab-gitlab.apps.cluster-kzvll.kzvll.sandbox355.opentlc.com/rhdh/trusted-application-pipeline-templates/blob/main/catalogs.yaml
+            type: url
+            rules:
+              - allow: [Component, System, API, Resource, Location, Template]
+          - target: https://gitlab-gitlab.apps.cluster-kzvll.kzvll.sandbox355.opentlc.com/rhdh/redhat-developer-templates/blob/master/showcase-templates.yaml
+            type: url
+            rules:
+              - allow: [Template]
+        providers:
+          gitlab:
+            selfHosted:
+              host: gitlab-gitlab.apps.cluster-kzvll.kzvll.sandbox355.opentlc.com
+              schedule: # optional; same options as in TaskScheduleDefinition
+                # supports cron, ISO duration, "human duration" as used in code
+                frequency: { seconds: 10 }
+                # supports ISO duration, "human duration" as used in code
+                timeout: { seconds: 60 }
+          ocm:
+            default:
+              name: multiclusterhub
+              kubernetesPluginRef: dev-cluster-infra
+              schedule: # optional; same options as in TaskScheduleDefinition
+                # supports cron, ISO duration, "human duration" as used in code
+                frequency: { seconds: 10 }
+                # supports ISO duration, "human duration" as used in code
+                timeout: { seconds: 60 }
+              owner: group:rhdh
+
+      argocd:
+        appLocatorMethods:
+          - type: 'config'
+            instances:
+              - name: main
+                url: 	https://argocd-server-janus-argocd.apps.cluster-kzvll.kzvll.sandbox355.opentlc.com
+                username: admin
+                password: OTIyMDU1
+
+      kubernetes:
+        serviceLocatorMethod:
+          type: "multiTenant"
+        clusterLocatorMethods:
+          - type: "config"
+            clusters:
+              - name: dev-cluster-infra
+                url: https://api.cluster-kzvll.kzvll.sandbox355.opentlc.com:6443
+                authProvider: "serviceAccount"
+                skipTLSVerify: true
+                serviceAccountToken: eyJhbGciOiJSUzI1NiIsImtpZCI6ImFMcXNRcDlIUnZoYmVzTXpZT2tpeDhvVUtPc3VMMm5tMWNwczNqSnFBSVUifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImRlZmF1bHQtdG9rZW4iLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoiZGVmYXVsdCIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6ImE3ZjQwZjNiLTU0NjAtNDdjOS05Mzg3LWE4ZDJmZTRkOWMwYSIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpkZWZhdWx0OmRlZmF1bHQifQ.BEVpS1NBj7XIB4G3VxQkLQsmBJ30v6zq7HU_NKgl0jgWJLujwTZz3f2NuG5K8BUo95nn9_T7-G5pBjHXrXk7YdOqt6wE5AO8Kdaa3ygOlVoYC0F5yGFt33gD6SrXKE6rThP1YZJwR0YrzhRgknCeZDUHwbD43CaeN6JaBvz4M3JYT_xWvz-pdSJITJ6HfkmD71QSEODJ2DeWLb3JJZsiPHJCwOYNPf6D3Rshw-fwoOdevrhkwKM95AmRMRqx1X1DawP3d8qFdI3qHtGZ5QhZAKDLFCrNuyTNROEmb0HCH_cw--f6lqv3xA6nk6KUjdGLhm3bWH-kO37eDB8OTrfAKKwwvFG86wNx4fa74ARhS-RrxYkswJoaBr_lBx0sdQ6lZVkWXWUsC4g9dVYzMByImwZsQ6Vd4D4jkHuzzxQ5TTNUIDOeSnpcKn8ds0J4hnA1h7HgDq_GXEap30RLVnJdTScP4O3Tc6FrgVzPMzZV0UFyE0jQbpgsQETGOe-b6p9-8si3oPmLP29vR6aBkbwxBdVqTgtmk3FVrCKzBzGoGs4auZ5QXjt2VKlkZTCOlsoMt39UHuUjIGPaI07BJaEgKxcZQ2bDWlr8g6egHgLY1uDjTqTFQb0NFeKz3rHOYiKbznUnwgIoHJTU-J4cDpSJtx-oyS0rAP-fxCS_njDy9lw
+        customResources:
+          - group: 'tekton.dev'
+            apiVersion: 'v1beta1'
+            plural: 'pipelineruns'
+          - group: 'tekton.dev'
+            apiVersion: 'v1beta1'
+            plural: 'taskruns'
+          - group: 'route.openshift.io'
+            apiVersion: 'v1'
+            plural: 'routes'
+
+      permission:
+        enabled: false
+
+      enabled:
+        kubernetes: true
+        techdocs: true
+        argocd: true
+        sonarqube: false
+        keycloak: true
+        ocm: true
+        github: false
+        githubOrg: false
+        gitlab: true
+        jenkins: true
+        permission: false
+
+  postgresql:
+    enabled: true
+    database: backstage
+    postgresqlDataDir: /var/lib/pgsql/data/userdata
+    auth:
+      username: postgres
+      database: backstage
+      existingSecret: backstage-postgresql
+      secretKeys:
+        userPasswordKey: postgres-password
+    image:
+      registry: registry.redhat.io
+      repository: rhel9/postgresql-13
+      tag: 1-73
+    primary:
+      securityContext:
+        enabled: false
+      podSecurityContext:
+        enabled: false
+      containerSecurityContext:
+        enabled: false
+      persistence:
+        enabled: true
+        mountPath: /var/lib/pgsql/data
+      extraEnvVars:
+        - name: POSTGRESQL_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: postgres-password
+              name: backstage-postgresql
+  service:
+    ports:
+      backend: 4180
+      targetPort: oauth2-proxy
+
+route:
+  enabled: true
+  host: backstage-backstage.apps.cluster-kzvll.kzvll.sandbox355.opentlc.com
+  tls:
+    enabled: true
+    termination: "edge"
